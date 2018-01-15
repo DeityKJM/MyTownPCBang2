@@ -15,6 +15,9 @@ import android.widget.TextView;
 import com.example.mytownpcbang.PcbangArray.pcAdapter;
 import com.example.mytownpcbang.PcbangArray.pcinfo;
 import com.example.mytownpcbang.R;
+import com.example.mytownpcbang.Server.HttpCallback;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -63,13 +66,22 @@ public class MainActivity extends AppCompatActivity {
         //샘플데이터 입력
         SetPcBangList();
 
+        /*
+        *
+        * */
+       // HttpRequester httpRequester=new HttpRequester();
+        //httpRequester.request("http://13.124.1.90:3000/api/allCeo", httpCallback);
+         /*
+        *
+        * */
+
         pcbang_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
                 //상세정보 액티비티
                 Intent pcbang = new Intent(MainActivity.this, Pcbang_detail_Activity.class);
-                pcbang.putExtra("Pcbang_code",Pcinfo_arr.get(position));//pc방 고유 코드
+                pcbang.putExtra("pcbanginfo",Pcinfo_arr.get(position));//pc방 고유 코드
                 startActivity(pcbang);
 
 
@@ -95,7 +107,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+    HttpCallback httpCallback=new HttpCallback() {
+        @Override
+        public void onResult(String result) {
+            try{
+                Log.d("test1","success!");
+                JSONObject root=new JSONObject(result);
+                Log.d("test1","result = "+result);
+                String imageFile=root.getString("file");
 
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    };
     //pc방리스트 보여주는 액티비티
     public void MainButton(View v) {
         switch (v.getId()) {
@@ -127,12 +152,25 @@ public class MainActivity extends AppCompatActivity {
     public void SetPcBangList() { //샘플데이터
         Pcinfo_arr.clear(); //서버 데이터 통신
         //샘플데이터    pcinfo(String pcBangName, int pcBangTel, int postCode, String roadAddress, String detailAddress, int ipFirst, int ipSecond, int ipThird)
-        Pcinfo_arr.add(new pcinfo("3POP\nPC방 ", 0101155555, 0, "서울시 동작구", "123", 0, 0, 0, 4.5f));
-        Pcinfo_arr.add(new pcinfo("TRON\nPC방", 0101155555, 0, "대전시 몰랑구", "456", 0, 0, 0,5f));
-        Pcinfo_arr.add(new pcinfo("XRP\nPC방", 0101155555, 0, "대구시 동태구", "789", 0, 0, 0,3.5f));
-        Pcinfo_arr.add(new pcinfo("BTC\nPC방", 0101115555, 0, "부산시 벗엇구", "147", 0, 0, 0,2.5f));
-        Pcinfo_arr.add(new pcinfo("UPBIT\nPC방", 0101115555, 0, "찍고시 트론가좌", "258", 0, 0, 0,1.5f));
-        Pcinfo_arr.add(new pcinfo("GAZEA\nPC방", 0101115555, 0, "아하시 야시시", "369", 0, 0, 0,0.5f));
+        Pcinfo_arr.add(new pcinfo("3POP\nPC방 ", 0101155555, 0,
+                "서울시 동작구", "123", 0,
+                0, 0, 4.5f,36f,128f));
+
+        Pcinfo_arr.add(new pcinfo("TRON\nPC방", 0101155555, 0,
+                "대전시 몰랑구", "456", 0, 0, 0,5f,36f,128f));
+
+
+        Pcinfo_arr.add(new pcinfo("XRP\nPC방", 0101155555, 0,
+                "대구시 동태구", "789", 0, 0, 0,3.5f,36,128));
+
+        Pcinfo_arr.add(new pcinfo("BTC\nPC방", 0101115555, 0,
+                "부산시 벗엇구", "147", 0, 0, 0,2.5f,36,128));
+
+        Pcinfo_arr.add(new pcinfo("UPBIT\nPC방", 0101115555, 0,
+                "찍고시 트론가좌", "258", 0, 0, 0,1.5f,36,128));
+
+        Pcinfo_arr.add(new pcinfo("GAZEA\nPC방", 0101115555, 0,
+                "아하시 야시시", "369", 0, 0, 0,0.5f,36,128));
         PcbangAdapter.notifyDataSetChanged();
     }
 

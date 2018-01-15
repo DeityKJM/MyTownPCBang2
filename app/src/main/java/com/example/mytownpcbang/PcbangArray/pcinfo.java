@@ -1,11 +1,9 @@
 package com.example.mytownpcbang.PcbangArray;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 
-/**
- * Created by KimJeongMin on 2017-12-15.
- */
 
 public class pcinfo implements Serializable {
     private String pcBangName;//
@@ -17,9 +15,12 @@ public class pcinfo implements Serializable {
     private int ipSecond;
     private int ipThird;
     private float starnum;
+    private float Latitude;
+    private float Longitude;
+    private ArrayList<PcbangReview> Arr;
 
 
-    public pcinfo(String pcBangName, int pcBangTel, int postCode, String roadAddress, String detailAddress, int ipFirst, int ipSecond, int ipThird,float starnum) {
+    public pcinfo(String pcBangName, int pcBangTel, int postCode, String roadAddress, String detailAddress, int ipFirst, int ipSecond, int ipThird, float starnum,float Latitude,float Longitude) {
         this.pcBangName = pcBangName;
         this.pcBangTel = pcBangTel;
         this.postCode = postCode;
@@ -29,6 +30,8 @@ public class pcinfo implements Serializable {
         this.ipSecond = ipSecond;
         this.ipThird = ipThird;
         this.starnum=starnum;
+        this.Latitude=Latitude;
+        this.Longitude=Longitude;
     }
 
     public void setPcBangName(String pcBangName) {
@@ -63,6 +66,20 @@ public class pcinfo implements Serializable {
         this.ipThird = ipThird;
     }
 
+    public void setLatitude(float Latitude){this.Latitude=Latitude;}
+
+    public void setLongitude(float Longitude){this.Longitude=Longitude;}
+
+    public void setArr(PcbangReview arr){Arr.add(arr);}
+
+    public ArrayList<PcbangReview> getArr(){return Arr;}
+
+
+
+    public float getLatitude(){return Latitude;}
+
+    public float getLongitude(){return Longitude;}
+
     public String getPcBangName() {
         return pcBangName;
     }
@@ -96,6 +113,18 @@ public class pcinfo implements Serializable {
     }
 
     public float getStarnum(){return starnum;}
+
+
+
+
+
+
+
+
+
+
+
+
 /*
     @Override
     public int describeContents() {
