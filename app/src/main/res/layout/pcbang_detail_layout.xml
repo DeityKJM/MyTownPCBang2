@@ -7,6 +7,7 @@
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="56dp"
+        android:background="#80000000"
         android:orientation="vertical"
         android:padding="5dp">
 
@@ -114,6 +115,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
+                    android:background="@color/common_google_signin_btn_text_light_default"
                     android:gravity="center"
                     android:text="대회 여부" />
 
@@ -122,6 +124,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
+                    android:background="@color/common_google_signin_btn_text_light_default"
                     android:gravity="center"
                     android:text="pc사양" />
 
@@ -138,6 +141,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
+                    android:background="@color/common_google_signin_btn_text_light_default"
                     android:gravity="center"
                     android:text="위치보기" />
 
@@ -146,6 +150,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
+                    android:background="@color/common_google_signin_btn_text_light_default"
                     android:gravity="center"
                     android:text="후기" />
 
@@ -165,6 +170,7 @@
                 android:id="@+id/lay_pcbang_Seat"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="#40000000"
                 android:orientation="vertical"
                 android:visibility="visible">
 

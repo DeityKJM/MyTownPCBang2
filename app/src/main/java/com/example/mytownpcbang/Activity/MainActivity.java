@@ -172,6 +172,17 @@ public class MainActivity extends AppCompatActivity {
         Pcinfo_arr.add(new pcinfo("GAZEA\nPC방", 0101115555, 0,
                 "아하시 야시시", "369", 0, 0, 0,0.5f,36,128));
         PcbangAdapter.notifyDataSetChanged();
+
+        /*
+        * JSONArray root = new JSONArray(result);
+
+
+                Log.d("postCode : ",root.getJSONObject(0).getJSONObject("address").getString("postCode"));
+                Log.d("roadAddress : ",root.getJSONObject(1).getJSONObject("address").getString("roadAddress"));
+                Log.d("detailAddress : ",root.getJSONObject(2).getJSONObject("address").getString("detailAddress"));
+                Log.d("id : ",root.getJSONObject(3).getString("_id"));
+                Log.d("pcBangName : ",root.getJSONObject(0).getString("pcBangName"));
+                Log.d("tel : ",root.getJSONObject(0).getString("tel"));*/
     }
 
 

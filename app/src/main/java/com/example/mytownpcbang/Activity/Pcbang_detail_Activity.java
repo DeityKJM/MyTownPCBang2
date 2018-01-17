@@ -35,7 +35,7 @@ import pl.polidea.view.ZoomView;
  * Created by KimJeongMin on 2017-12-17.
  */
 
-public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapReadyCallback,View.OnClickListener {
+public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
     TextView btn_text_back, text_title, btn_text_fav;
     LinearLayout Layout_pcbang_seat, Layout_pcbang_map, Layout_pcbang_review; //좌석/후기/위치
     TextView Pcbang_image, pcbang_info, btn_text_event, btn_text_pcspec, btn_text_loc, btn_text_review, btn_text_review_write;
@@ -59,14 +59,17 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         Layout_pcbang_map = (LinearLayout) findViewById(R.id.lay_pcbang_map);
         Layout_pcbang_review = (LinearLayout) findViewById(R.id.lay_pcbang_review);
         review_listview = (ListView) findViewById(R.id.review_listview);
-
+        btn_text_review = (TextView) findViewById(R.id.btn_text_review);
         btn_text_loc = (TextView) findViewById(R.id.btn_text_loc);
         Pcbang_image = (TextView) findViewById(R.id.Pcbang_image);
         pcbang_info = (TextView) findViewById(R.id.pcbang_info);
-        btn_text_event= (TextView) findViewById(R.id.btn_text_event);
-        btn_text_pcspec= (TextView) findViewById(R.id.btn_text_pcspec);
-        btn_text_review_write= (TextView) findViewById(R.id.btn_text_review_write);
+        pcbang_ratingbar=(RatingBar)findViewById(R.id.pcbang_rating);
+        btn_text_event = (TextView) findViewById(R.id.btn_text_event);
+        btn_text_pcspec = (TextView) findViewById(R.id.btn_text_pcspec);
+        btn_text_review_write = (TextView) findViewById(R.id.btn_text_review_write);
         btn_text_review_write.setOnClickListener(this);
+        btn_text_loc.setOnClickListener(this);
+        btn_text_review.setOnClickListener(this);
     }
 
     @Override
@@ -75,21 +78,28 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         setContentView(R.layout.pcbang_detail_layout);
         SetLayout();//레이아웃세팅;
         arr = (pcinfo) getIntent().getSerializableExtra("pcbanginfo");
+        //intent 데이터 받기
         ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+        //map세팅
 
-        Log.d("외안디", "arr.getLatitude() " + arr.getPcBangName() + " arr.getLongitude() " + arr.getpcBangTel());
 
+        //pc방 정보 세팅
         Pcbang_image.setText(arr.getPcBangName());
-        pcbang_info.setText(arr.getdetailAddress()+arr.getroadAddress());
-        btn_text_pcspec.setText("사양\n"+arr.getpcBangTel());
+        pcbang_info.setText(arr.getdetailAddress() + arr.getroadAddress());
+        btn_text_pcspec.setText("사양\n" + arr.getpcBangTel());
+        pcbang_ratingbar.setNumStars(5);
+        pcbang_ratingbar.setStepSize(0.5f);
+        pcbang_ratingbar.setRating(arr.getStarnum());
 
+        //인플레이트 레이아웃
         v = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.zoom_item, null, false);
         grid = (GridLayout) v.findViewById(R.id.Grid);
-        grid.setColumnCount(5);
+        grid.setColumnCount(5); //가로세로 설정
         grid.setRowCount(5);
         container.addView(PCseatView(v, 4, 5, nums));
 
 
+        //뒤로가기 버튼
         btn_text_back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +107,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
             }
         });
 
+        //즐겨찾기 버튼
         btn_text_fav.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,10 +116,11 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         });
     }
 
-
-    public void onClick(View c){
-        switch (v.getId()) {
+    @Override
+    public void onClick(View c) {
+        switch (c.getId()) {
             case R.id.btn_text_loc:
+                Log.d("touch", "test ok");
                 Detail_layout_change(Integer.parseInt(Layout_pcbang_map.getTag().toString()));
                 break;
             case R.id.btn_text_review:
@@ -119,9 +131,12 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 //review_listview.setAdapter();
                 break;
             case R.id.btn_text_review_write:
-                Intent reviewIntent = new Intent(Pcbang_detail_Activity.this,Pcbang_review_Activity.class);
-                reviewIntent.putExtra("pcbanginfo",arr);
+                Intent reviewIntent = new Intent(Pcbang_detail_Activity.this, Pcbang_review_Activity.class);
+                reviewIntent.putExtra("pcbanginfo2", arr);
                 startActivity(reviewIntent);
+                Layout_pcbang_review.setVisibility(View.GONE);
+                Layout_pcbang_map.setVisibility(View.GONE);
+                Layout_pcbang_seat.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -129,6 +144,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
 
     //위치보기
     private void Detail_layout_change(int num) {
+        Log.d("touch", "test ok");
         if (num == 0) {
             //경도 위도 사이즈범위 정해서 보내주기
             Layout_pcbang_map.setTag(1);
@@ -187,7 +203,6 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
 
-        //   Log.d("외안디","arr.getLatitude() "+arr.getLatitude()+" arr.getLongitude() "+arr.getLongitude());
         if (map != null) {
             LatLng latLng = new LatLng(arr.getLatitude(), arr.getLongitude());
             CameraPosition position = new CameraPosition.Builder().target(latLng).zoom(16f).build();
