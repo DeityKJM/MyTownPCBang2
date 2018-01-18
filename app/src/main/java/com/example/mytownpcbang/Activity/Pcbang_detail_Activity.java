@@ -1,10 +1,13 @@
 package com.example.mytownpcbang.Activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +21,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mytownpcbang.PcbangArray.pcinfo;
+import com.example.mytownpcbang.PcbangArray.PcBang_info;
 import com.example.mytownpcbang.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -28,6 +31,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+
+import java.util.ArrayList;
 
 import pl.polidea.view.ZoomView;
 
@@ -45,9 +52,15 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
     LinearLayout container;
     View v;
     GridLayout grid;
-    int[] nums = {0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
-    pcinfo arr;
+    //
 
+    SharedPreferences mPref;
+    SharedPreferences.Editor mEditor;
+
+
+    int[] nums = {0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
+    PcBang_info arr;
+    ArrayList<String> fav_list = new ArrayList<>();
 //
 
     public void SetLayout() {
@@ -63,25 +76,21 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         btn_text_loc = (TextView) findViewById(R.id.btn_text_loc);
         Pcbang_image = (TextView) findViewById(R.id.Pcbang_image);
         pcbang_info = (TextView) findViewById(R.id.pcbang_info);
-        pcbang_ratingbar=(RatingBar)findViewById(R.id.pcbang_rating);
+        pcbang_ratingbar = (RatingBar) findViewById(R.id.pcbang_rating);
         btn_text_event = (TextView) findViewById(R.id.btn_text_event);
         btn_text_pcspec = (TextView) findViewById(R.id.btn_text_pcspec);
         btn_text_review_write = (TextView) findViewById(R.id.btn_text_review_write);
         btn_text_review_write.setOnClickListener(this);
         btn_text_loc.setOnClickListener(this);
         btn_text_review.setOnClickListener(this);
-    }
+        btn_text_back.setOnClickListener(this);
+        btn_text_fav.setOnClickListener(this);
+        mPref = getSharedPreferences("test", MODE_PRIVATE);
+        mEditor = mPref.edit();
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.pcbang_detail_layout);
-        SetLayout();//레이아웃세팅;
-        arr = (pcinfo) getIntent().getSerializableExtra("pcbanginfo");
+
         //intent 데이터 받기
-        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
-        //map세팅
-
+        arr = (PcBang_info) getIntent().getSerializableExtra("pcbanginfo");
 
         //pc방 정보 세팅
         Pcbang_image.setText(arr.getPcBangName());
@@ -89,7 +98,19 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         btn_text_pcspec.setText("사양\n" + arr.getpcBangTel());
         pcbang_ratingbar.setNumStars(5);
         pcbang_ratingbar.setStepSize(0.5f);
-        pcbang_ratingbar.setRating(arr.getStarnum());
+        pcbang_ratingbar.setRating(Float.parseFloat(arr.getStarnum()));
+
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.pcbang_detail_layout);
+        SetLayout();//레이아웃세팅;
+
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+        //map세팅
+
 
         //인플레이트 레이아웃
         v = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.zoom_item, null, false);
@@ -99,21 +120,24 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         container.addView(PCseatView(v, 4, 5, nums));
 
 
-        //뒤로가기 버튼
-        btn_text_back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+       String json_fav_list= mPref.getString("fav_list",null); //즐겨찾기 목록 불러오기
+       if(json_fav_list!=null){
+           try{
+               JSONArray fav_array = new JSONArray(json_fav_list);
+               for(int i =0; i<fav_array.length(); i++){
+                   fav_list.add(fav_array.getJSONObject(i).toString());
+                   if(fav_array.getJSONObject(i).toString().equals(arr.getPcBangName())){ //즐겨찾기 목록에 지금 현 pc방이름과 일치하는 데이터 있는지 확인
+                       btn_text_fav.setTag("on"); //태그 on
+                       btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
+                   }
+               }
+           }
+           catch (Exception e){
+               e.printStackTrace();
+           }
+       }
 
-        //즐겨찾기 버튼
-        btn_text_fav.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(Pcbang_detail_Activity.this, "미구현", Toast.LENGTH_SHORT).show();
-            }
-        });
+
     }
 
     @Override
@@ -138,9 +162,15 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 Layout_pcbang_map.setVisibility(View.GONE);
                 Layout_pcbang_seat.setVisibility(View.VISIBLE);
                 break;
+
+            case R.id.btn_text_back:
+                finish();
+                break;
+            case R.id.btn_text_fav:
+                Shared_Fav();
+                break;
         }
     }
-
 
     //위치보기
     private void Detail_layout_change(int num) {
@@ -204,7 +234,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         map = googleMap;
 
         if (map != null) {
-            LatLng latLng = new LatLng(arr.getLatitude(), arr.getLongitude());
+            LatLng latLng = new LatLng(Float.parseFloat(arr.getLatitude()), Float.parseFloat(arr.getLongitude()));
             CameraPosition position = new CameraPosition.Builder().target(latLng).zoom(16f).build();
             map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
 
@@ -216,6 +246,56 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
 
             map.addMarker(markerOptions);
 
+
+        }
+    }
+
+    public void Shared_Fav() {
+        if (btn_text_fav.getTag().toString().equals("on")) {//즐겨찾기 되어잇을시
+            final AlertDialog.Builder fav_Alert = new AlertDialog.Builder(Pcbang_detail_Activity.this,MODE_APPEND);
+            fav_Alert.setTitle("즐겨찾기");
+            fav_Alert.setMessage("즐겨찾기를 해제하시겠습니까?");
+            fav_Alert.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    return;
+                }
+            });
+            fav_Alert.setPositiveButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    for(int c=0; c<fav_list.size(); c++){
+                        if(fav_list.get(c).equals(arr.getPcBangName())){
+                            fav_list.remove(c);
+                        }
+                    }
+                    JSONArray tmp = new JSONArray();
+                    for(int d=0; d<fav_list.size(); d++){
+                        tmp.put(fav_list.get(d));
+                    }
+                    mEditor.putString("fav_list",tmp.toString());
+                    mEditor.commit();
+                    btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_off);
+                }
+            });
+
+        } else {//즐겨찾기 x
+            if(fav_list.size()>2){
+                //크기초과
+                Toast.makeText(this, "즐겨찾기는 최대 3개까지 가능합니다.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                fav_list.add(arr.getPcBangName());
+                JSONArray tmp = new JSONArray();
+                for(int d=0; d<fav_list.size(); d++){
+                    tmp.put(fav_list.get(d));
+                }
+                mEditor.putString("fav_list",tmp.toString());
+                mEditor.commit();
+                btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
+                btn_text_fav.setTag("on");
+            }
 
         }
     }

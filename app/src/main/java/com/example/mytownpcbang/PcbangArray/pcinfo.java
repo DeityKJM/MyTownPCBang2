@@ -114,55 +114,5 @@ public class pcinfo implements Serializable {
 
     public float getStarnum(){return starnum;}
 
-
-
-
-
-
-
-
-
-
-
-
-/*
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(pcBangName);
-        dest.writeInt(pcBangTel);
-        dest.writeInt(postCode);
-        dest.writeString(roadAddress);
-        dest.writeString(detailAddress);
-        dest.writeInt(ipFirst);
-        dest.writeInt(ipSecond);
-        dest.writeInt(ipThird);
-    }
-
-    private void readFromParcel(Parcel in) {
-        pcBangName = in.readString();
-        pcBangTel = in.readInt();
-        postCode = in.readInt();
-        roadAddress = in.readString();
-        detailAddress = in.readString();
-        ipFirst = in.readInt();
-        ipSecond = in.readInt();
-        ipThird = in.readInt();
-    }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public pcinfo createFromParcel(Parcel in) {
-            return new pcinfo(in);
-        }
-
-        public pcinfo[] newArray(int size) {
-            return new pcinfo[size];
-        }
-    };
-*/
 }
 

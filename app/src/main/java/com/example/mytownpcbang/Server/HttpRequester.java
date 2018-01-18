@@ -3,14 +3,15 @@ package com.example.mytownpcbang.Server;
 import android.os.AsyncTask;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class HttpRequester {
-
-	public HttpTask http;
+	
+	HttpTask http;
 	
 	public void request(String url, HttpCallback callback) {
 		http = new HttpTask(url, callback);
@@ -45,9 +46,9 @@ public class HttpRequester {
 				http.setRequestProperty("Content-type","application/x-www-form-urlencoded;charset=UTF-8");
 				http.setConnectTimeout(10000);
 				http.setReadTimeout(10000);
-				http.setRequestMethod("POST");
+				http.setRequestMethod("GET");
 				http.setDoInput(true);
-				http.setDoOutput(true);
+				//http.setDoOutput(true);
 
 
 				in=new BufferedReader(new InputStreamReader(http.getInputStream(), "UTF-8"));
@@ -59,16 +60,9 @@ public class HttpRequester {
 				response=sb.toString();
 
 
-
-			}catch (Exception e){
+			}catch (IOException e){
 				e.printStackTrace();
-			} finally {
-				{
-					try{
-						if(pw != null) pw.close();
-						if(in != null) in.close();
-					}catch (Exception e){}
-				}
+				return null;
 			}
 
 			return response;

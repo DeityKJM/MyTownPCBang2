@@ -1,7 +1,6 @@
 package com.example.mytownpcbang.PcbangArray;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,13 +17,13 @@ import java.util.ArrayList;
  */
 
 public class pcAdapter extends BaseAdapter {
-    private ArrayList<pcinfo> arr = new ArrayList<>();
+    private ArrayList<PcBang_info> arr = new ArrayList<>();
     private Context mContext;
     private int layout;
     private LayoutInflater inflater;
 
 
-    public pcAdapter(Context mContext, int layout, ArrayList<pcinfo> arr) {
+    public pcAdapter(Context mContext, int layout, ArrayList<PcBang_info> arr) {
         this.mContext = mContext;
         this.layout = layout;
         this.arr = arr;
@@ -37,7 +36,7 @@ public class pcAdapter extends BaseAdapter {
     }
 
     @Override
-    public pcinfo getItem(int i) {
+    public PcBang_info getItem(int i) {
         return arr.get(i);
     }
 
@@ -57,10 +56,10 @@ public class pcAdapter extends BaseAdapter {
 
 
 
-        final float starnum = getItem(position).getStarnum();
+        final String starnum = getItem(position).getStarnum();
         star.setNumStars(5);
         star.setStepSize(0.5f);
-        star.setRating(starnum);
+        star.setRating(Float.parseFloat(starnum));
 
 
 

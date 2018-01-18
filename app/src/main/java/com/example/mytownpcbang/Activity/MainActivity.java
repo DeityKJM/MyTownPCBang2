@@ -11,13 +11,17 @@ import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.mytownpcbang.PcbangArray.PcBang_info;
 import com.example.mytownpcbang.PcbangArray.pcAdapter;
-import com.example.mytownpcbang.PcbangArray.pcinfo;
 import com.example.mytownpcbang.R;
 import com.example.mytownpcbang.Server.HttpCallback;
+import com.example.mytownpcbang.Server.HttpRequester;
+import com.example.mytownpcbang.Server.Pcbang_uri;
 
-import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -25,12 +29,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     pcAdapter PcbangAdapter;
-    ArrayList<pcinfo> Pcinfo_arr = new ArrayList<>();
+    ArrayList<PcBang_info> Pcinfo_arr = new ArrayList<>();
     ListView pcbang_list;
     Switch fav_switch;
     TextView textView;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
+    ArrayList<PcBang_info> Pcbang_fav_arr = new ArrayList<>();
 
     void setLayout() {
 
@@ -38,11 +43,11 @@ public class MainActivity extends AppCompatActivity {
         fav_switch = (Switch) findViewById(R.id.fav_switch);
         textView = (TextView) findViewById(R.id.tmpview);
 
-        PcbangAdapter = new pcAdapter(this, R.layout.pcbanglist, Pcinfo_arr);
+        PcbangAdapter = new pcAdapter(this, R.layout.pcbanglist, Pcbang_fav_arr);
         pcbang_list.setAdapter(PcbangAdapter);
 
 
-        pref = getSharedPreferences("PcBangtest", MODE_PRIVATE);
+        pref = getSharedPreferences("test", MODE_PRIVATE);
         editor = pref.edit();
 
 
@@ -66,14 +71,30 @@ public class MainActivity extends AppCompatActivity {
         //샘플데이터 입력
         SetPcBangList();
 
-        /*
-        *
-        * */
-       // HttpRequester httpRequester=new HttpRequester();
-        //httpRequester.request("http://13.124.1.90:3000/api/allCeo", httpCallback);
-         /*
-        *
-        * */
+        if (pref.getString("fav_list", null) == null) {
+            Log.d("fav_data", "null");
+        } else {
+            String fav_arr = pref.getString("fav_list", null);
+            if (fav_arr != null) {
+                try {
+                    JSONArray json_fav_list = new JSONArray(fav_arr);
+                    for (int i = 0; i < json_fav_list.length(); i++) {
+                        for (int c = 0; c < Pcinfo_arr.size(); c++) {
+
+                            if (json_fav_list.getJSONObject(i).toString().equals(Pcinfo_arr.get(c).getPcBangName())) {
+                                Pcbang_fav_arr.add(Pcinfo_arr.get(c));
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            PcbangAdapter.notifyDataSetChanged();
+
+        }
+
 
         pcbang_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -81,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //상세정보 액티비티
                 Intent pcbang = new Intent(MainActivity.this, Pcbang_detail_Activity.class);
-                pcbang.putExtra("pcbanginfo",Pcinfo_arr.get(position));//pc방 고유 코드
+                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position));//pc방 고유 코드
                 startActivity(pcbang);
 
 
@@ -107,20 +128,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-    HttpCallback httpCallback=new HttpCallback() {
-        @Override
-        public void onResult(String result) {
-            try{
-                Log.d("test1","success!");
-                JSONObject root=new JSONObject(result);
-                Log.d("test1","result = "+result);
-                String imageFile=root.getString("file");
 
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    };
     //pc방리스트 보여주는 액티비티
     public void MainButton(View v) {
         switch (v.getId()) {
@@ -150,40 +158,43 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void SetPcBangList() { //샘플데이터
-        Pcinfo_arr.clear(); //서버 데이터 통신
-        //샘플데이터    pcinfo(String pcBangName, int pcBangTel, int postCode, String roadAddress, String detailAddress, int ipFirst, int ipSecond, int ipThird)
-        Pcinfo_arr.add(new pcinfo("3POP\nPC방 ", 0101155555, 0,
-                "서울시 동작구", "123", 0,
-                0, 0, 4.5f,36f,128f));
 
-        Pcinfo_arr.add(new pcinfo("TRON\nPC방", 0101155555, 0,
-                "대전시 몰랑구", "456", 0, 0, 0,5f,36f,128f));
+        HttpRequester httpRequester = new HttpRequester();
+        httpRequester.request(Pcbang_uri.pcBang_allceo, httpCallback);
 
-
-        Pcinfo_arr.add(new pcinfo("XRP\nPC방", 0101155555, 0,
-                "대구시 동태구", "789", 0, 0, 0,3.5f,36,128));
-
-        Pcinfo_arr.add(new pcinfo("BTC\nPC방", 0101115555, 0,
-                "부산시 벗엇구", "147", 0, 0, 0,2.5f,36,128));
-
-        Pcinfo_arr.add(new pcinfo("UPBIT\nPC방", 0101115555, 0,
-                "찍고시 트론가좌", "258", 0, 0, 0,1.5f,36,128));
-
-        Pcinfo_arr.add(new pcinfo("GAZEA\nPC방", 0101115555, 0,
-                "아하시 야시시", "369", 0, 0, 0,0.5f,36,128));
-        PcbangAdapter.notifyDataSetChanged();
-
-        /*
-        * JSONArray root = new JSONArray(result);
-
-
-                Log.d("postCode : ",root.getJSONObject(0).getJSONObject("address").getString("postCode"));
-                Log.d("roadAddress : ",root.getJSONObject(1).getJSONObject("address").getString("roadAddress"));
-                Log.d("detailAddress : ",root.getJSONObject(2).getJSONObject("address").getString("detailAddress"));
-                Log.d("id : ",root.getJSONObject(3).getString("_id"));
-                Log.d("pcBangName : ",root.getJSONObject(0).getString("pcBangName"));
-                Log.d("tel : ",root.getJSONObject(0).getString("tel"));*/
     }
 
+    HttpCallback httpCallback = new HttpCallback() {
+        @Override
+        public void onResult(String result) {
+            try {
+                Pcinfo_arr.clear(); //서버 데이터 통신
 
+                JSONArray root = new JSONArray(result);
+
+                for (int i = 0; i < root.length(); i++) {
+                    Pcinfo_arr.add(
+                            new PcBang_info(root.getJSONObject(0).getString("pcBangName"),
+                                    root.getJSONObject(0).getString("tel"),
+                                    root.getJSONObject(i).getJSONObject("address").getString("postCode"),
+                                    root.getJSONObject(1).getJSONObject("address").getString("roadAddress"),
+                                    root.getJSONObject(2).getJSONObject("address").getString("detailAddress"),
+                                    "4",
+                                    root.getJSONObject(i).getJSONObject("location").getString("lat"),
+                                    root.getJSONObject(i).getJSONObject("location").getString("lon")));
+
+                }
+
+
+            } catch (JSONException d) {
+
+                d.printStackTrace();
+
+            }
+            catch (NullPointerException f){
+                Toast.makeText(MainActivity.this, "데이터 에러", Toast.LENGTH_SHORT).show();
+            }
+            PcbangAdapter.notifyDataSetChanged();
+        }
+    };
 }
