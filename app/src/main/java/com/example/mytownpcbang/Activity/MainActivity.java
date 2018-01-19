@@ -81,10 +81,9 @@ public class MainActivity extends AppCompatActivity {
 
                 //상세정보 액티비티
                 Intent pcbang = new Intent(MainActivity.this, Pcbang_detail_Activity.class);
-                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position));//pc방 고유 코드
+                pcbang.putExtra("pcbanginfo", Pcbang_fav_arr.get(position));//pc방 고유 코드
                 startActivity(pcbang);
-
-
+                
             }
         });
 
