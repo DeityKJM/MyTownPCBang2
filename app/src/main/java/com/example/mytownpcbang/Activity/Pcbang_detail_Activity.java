@@ -85,7 +85,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         btn_text_review.setOnClickListener(this);
         btn_text_back.setOnClickListener(this);
         btn_text_fav.setOnClickListener(this);
-        mPref = getSharedPreferences("test", MODE_PRIVATE);
+        mPref = getSharedPreferences("test2", MODE_PRIVATE);
         mEditor = mPref.edit();
 
 
@@ -120,22 +120,25 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         container.addView(PCseatView(v, 4, 5, nums));
 
 
-       String json_fav_list= mPref.getString("fav_list",null); //즐겨찾기 목록 불러오기
-       if(json_fav_list!=null){
-           try{
-               JSONArray fav_array = new JSONArray(json_fav_list);
-               for(int i =0; i<fav_array.length(); i++){
-                   fav_list.add(fav_array.getJSONObject(i).toString());
-                   if(fav_array.getJSONObject(i).toString().equals(arr.getPcBangName())){ //즐겨찾기 목록에 지금 현 pc방이름과 일치하는 데이터 있는지 확인
-                       btn_text_fav.setTag("on"); //태그 on
-                       btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
-                   }
-               }
-           }
-           catch (Exception e){
-               e.printStackTrace();
-           }
-       }
+        String json_fav_list = mPref.getString("fav_list", null); //즐겨찾기 목록 불러오기
+        if (json_fav_list != null) {
+            try {
+                JSONArray fav_array = new JSONArray(json_fav_list);
+                for (int i = 0; i < fav_array.length(); i++) {
+                    fav_list.add(fav_array.optString(i));
+
+                    if (fav_array.optString(i).equals(arr.get_id())) { //즐겨찾기 목록에 지금 현 pc방이름과 일치하는 데이터 있는지 확인
+                        btn_text_fav.setTag("on"); //태그 on
+                        btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
+                        Log.d("fav_data", "switch 0n");
+
+                    }
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
 
     }
@@ -144,7 +147,6 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
     public void onClick(View c) {
         switch (c.getId()) {
             case R.id.btn_text_loc:
-                Log.d("touch", "test ok");
                 Detail_layout_change(Integer.parseInt(Layout_pcbang_map.getTag().toString()));
                 break;
             case R.id.btn_text_review:
@@ -252,7 +254,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
 
     public void Shared_Fav() {
         if (btn_text_fav.getTag().toString().equals("on")) {//즐겨찾기 되어잇을시
-            final AlertDialog.Builder fav_Alert = new AlertDialog.Builder(Pcbang_detail_Activity.this,MODE_APPEND);
+            final AlertDialog.Builder fav_Alert = new AlertDialog.Builder(Pcbang_detail_Activity.this, MODE_APPEND);
             fav_Alert.setTitle("즐겨찾기");
             fav_Alert.setMessage("즐겨찾기를 해제하시겠습니까?");
             fav_Alert.setNegativeButton("아니오", new DialogInterface.OnClickListener() {
@@ -265,36 +267,46 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
 
-                    for(int c=0; c<fav_list.size(); c++){
-                        if(fav_list.get(c).equals(arr.getPcBangName())){
+                    for (int c = 0; c < fav_list.size(); c++) {
+                        if (fav_list.get(c).equals(arr.get_id())) {
                             fav_list.remove(c);
+                            Log.d("fav_data", "삭제 일치");
                         }
                     }
                     JSONArray tmp = new JSONArray();
-                    for(int d=0; d<fav_list.size(); d++){
+                    for (int d = 0; d < fav_list.size(); d++) {
                         tmp.put(fav_list.get(d));
                     }
-                    mEditor.putString("fav_list",tmp.toString());
+                    mEditor.putString("fav_list", tmp.toString());
                     mEditor.commit();
+                    btn_text_fav.setTag("off");
                     btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_off);
                 }
             });
-
+            fav_Alert.show();
         } else {//즐겨찾기 x
-            if(fav_list.size()>2){
+            if (fav_list.size() > 3) {
                 //크기초과
                 Toast.makeText(this, "즐겨찾기는 최대 3개까지 가능합니다.", Toast.LENGTH_SHORT).show();
-            }
-            else {
-                fav_list.add(arr.getPcBangName());
+            } else {
+                final String tmpstr = mPref.getString("fav_list", null);
+
+                for (int c = 0; c < fav_list.size(); c++) {
+                    if (fav_list.get(c).equals(arr.get_id())) {
+                        fav_list.remove(c);
+                    }
+                }
+                fav_list.add(arr.get_id());
                 JSONArray tmp = new JSONArray();
-                for(int d=0; d<fav_list.size(); d++){
+                for (int d = 0; d < fav_list.size(); d++) {
                     tmp.put(fav_list.get(d));
                 }
-                mEditor.putString("fav_list",tmp.toString());
+
+                mEditor.putString("fav_list", tmp.toString());
                 mEditor.commit();
                 btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
                 btn_text_fav.setTag("on");
+                Toast.makeText(this, arr.getPcBangName() + "를 즐겨찾기에 추가하였습니다.", Toast.LENGTH_SHORT).show();
             }
 
         }

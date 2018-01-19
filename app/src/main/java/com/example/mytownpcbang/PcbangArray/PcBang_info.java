@@ -10,6 +10,7 @@ public class PcBang_info implements Serializable {
     private String pcBangName;//
     private String pcBangTel;
     private String postCode;
+    private String _id;
     private String roadAddress;
     private String detailAddress;
     private String starnum;
@@ -18,10 +19,11 @@ public class PcBang_info implements Serializable {
 
 
 
-    public PcBang_info(String pcBangName, String pcBangTel, String postCode, String roadAddress, String detailAddress, String starnum,String Latitude,String Longitude) {
+    public PcBang_info(String pcBangName, String pcBangTel, String postCode, String roadAddress, String _id,String detailAddress, String starnum,String Latitude,String Longitude) {
         this.pcBangName = pcBangName;
         this.pcBangTel = pcBangTel;
         this.postCode = postCode;
+        this._id=_id;
         this.roadAddress = roadAddress;
         this.detailAddress = detailAddress;
         this.starnum=starnum;
@@ -52,9 +54,10 @@ public class PcBang_info implements Serializable {
     public void setLatitude(String Latitude){this.Latitude=Latitude;}
 
     public void setLongitude(String Longitude){this.Longitude=Longitude;}
+    public void set_id(String _id){this._id=_id;}
 
 
-
+    public String get_id(){return  _id;}
     public String getLatitude(){return Latitude;}
 
     public String getLongitude(){return Longitude;}

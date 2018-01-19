@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         pcbang_list.setAdapter(PcbangAdapter);
 
 
-        pref = getSharedPreferences("test", MODE_PRIVATE);
+        pref = getSharedPreferences("test2", MODE_PRIVATE);
         editor = pref.edit();
 
 
@@ -59,6 +59,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setLayout();
         boolean tmp = pref.getBoolean("fav_switch", false); //즐겨찾기 on/off 체크
+
+        //샘플데이터 입력
+        SetPcBangList();
+
+
         if (tmp) {
             fav_switch.setChecked(true);
             pcbang_list.setVisibility(View.VISIBLE);
@@ -67,32 +72,6 @@ public class MainActivity extends AppCompatActivity {
             fav_switch.setChecked(false);
             textView.setVisibility(View.VISIBLE);
             pcbang_list.setVisibility(View.GONE);
-        }
-        //샘플데이터 입력
-        SetPcBangList();
-
-        if (pref.getString("fav_list", null) == null) {
-            Log.d("fav_data", "null");
-        } else {
-            String fav_arr = pref.getString("fav_list", null);
-            if (fav_arr != null) {
-                try {
-                    JSONArray json_fav_list = new JSONArray(fav_arr);
-                    for (int i = 0; i < json_fav_list.length(); i++) {
-                        for (int c = 0; c < Pcinfo_arr.size(); c++) {
-
-                            if (json_fav_list.getJSONObject(i).toString().equals(Pcinfo_arr.get(c).getPcBangName())) {
-                                Pcbang_fav_arr.add(Pcinfo_arr.get(c));
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            PcbangAdapter.notifyDataSetChanged();
-
         }
 
 
@@ -113,12 +92,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
-                    Log.d("스위치", "on");
                     pcbang_list.setVisibility(View.VISIBLE);
                     textView.setVisibility(View.GONE);
                     editor.putBoolean("fav_switch", true);
                 } else {
-                    Log.d("스위치 ", "off");
                     textView.setVisibility(View.VISIBLE);
                     pcbang_list.setVisibility(View.GONE);
                     editor.putBoolean("fav_switch", false);
@@ -128,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 
     //pc방리스트 보여주는 액티비티
     public void MainButton(View v) {
@@ -174,27 +152,61 @@ public class MainActivity extends AppCompatActivity {
 
                 for (int i = 0; i < root.length(); i++) {
                     Pcinfo_arr.add(
-                            new PcBang_info(root.getJSONObject(0).getString("pcBangName"),
-                                    root.getJSONObject(0).getString("tel"),
+                            new PcBang_info(root.getJSONObject(i).getString("pcBangName"),
+                                    root.getJSONObject(i).getString("tel"),
                                     root.getJSONObject(i).getJSONObject("address").getString("postCode"),
-                                    root.getJSONObject(1).getJSONObject("address").getString("roadAddress"),
-                                    root.getJSONObject(2).getJSONObject("address").getString("detailAddress"),
+                                    root.getJSONObject(i).getJSONObject("address").getString("roadAddress"),
+                                    root.getJSONObject(i).getString("_id"),
+                                    root.getJSONObject(i).getJSONObject("address").getString("detailAddress"),
                                     "4",
                                     root.getJSONObject(i).getJSONObject("location").getString("lat"),
                                     root.getJSONObject(i).getJSONObject("location").getString("lon")));
 
                 }
-
+                Log.d("fav_data", "호출완료");
 
             } catch (JSONException d) {
 
                 d.printStackTrace();
 
-            }
-            catch (NullPointerException f){
+            } catch (NullPointerException f) {
                 Toast.makeText(MainActivity.this, "데이터 에러", Toast.LENGTH_SHORT).show();
+            } finally {
+                Callfav_list();
             }
-            PcbangAdapter.notifyDataSetChanged();
+
         }
     };
+
+    public void onResume(){
+        super.onResume();
+        Callfav_list();
+
+    }
+    public void Callfav_list() {
+
+        String fav_arr = pref.getString("fav_list", null);
+        if (fav_arr == null) {
+        } else {
+            Pcbang_fav_arr.clear();
+            try {
+                JSONArray json_fav_list = new JSONArray(fav_arr);
+                for (int c = 0; c < Pcinfo_arr.size(); c++) {
+
+                    for (int i = 0; i < json_fav_list.length(); i++) {
+                        if (json_fav_list.optString(i).equals(Pcinfo_arr.get(c).get_id())) {
+                            Pcbang_fav_arr.add(Pcinfo_arr.get(c));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            PcbangAdapter.notifyDataSetChanged();
+
+Log.d("fav_data","shared  : "+Pcbang_fav_arr.size());
+        }
+    }
+
+
 }

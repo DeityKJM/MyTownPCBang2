@@ -114,21 +114,23 @@ public class Pcbang_List_Activity extends Activity {
                 break;
         }
     }
+
+
+
     HttpCallback httpCallback = new HttpCallback() {
         @Override
         public void onResult(String result) {
             try {
                 Pcinfo_arr.clear(); //서버 데이터 통신
-
-                JSONArray root = new JSONArray(result);
-//즐겨찾기 데이터값
+                JSONArray root = new JSONArray(result);//즐겨찾기 데이터값
                 for (int i = 0; i < root.length(); i++) {
                     Pcinfo_arr.add(
-                            new PcBang_info(root.getJSONObject(0).getString("pcBangName"),
-                                    root.getJSONObject(0).getString("tel"),
+                            new PcBang_info(root.getJSONObject(i).getString("pcBangName"),
+                                    root.getJSONObject(i).getString("tel"),
                                     root.getJSONObject(i).getJSONObject("address").getString("postCode"),
-                                    root.getJSONObject(1).getJSONObject("address").getString("roadAddress"),
-                                    root.getJSONObject(2).getJSONObject("address").getString("detailAddress"),
+                                    root.getJSONObject(i).getJSONObject("address").getString("roadAddress"),
+                                    root.getJSONObject(i).getString("_id"),
+                                    root.getJSONObject(i).getJSONObject("address").getString("detailAddress"),
                                     "4",
                                     root.getJSONObject(i).getJSONObject("location").getString("lat"),
                                     root.getJSONObject(i).getJSONObject("location").getString("lon")));
