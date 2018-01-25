@@ -23,12 +23,12 @@ import org.json.JSONException;
 import java.util.ArrayList;
 
 /**
- * Created by KimJeongMin on 2017-12-30.
+ * Created by Jeongmin on 2018-01-20.
  */
 
-public class Pcbang_List_Activity extends Activity {
+public class Pcbang_Favorite_Activity extends Activity {
 
-    TextView btn_close,App_Title,btn_change_event;
+    TextView btn_close,App_Title,btn_search_pc;
 
     pcAdapter PcbangAdapter;
     ArrayList<PcBang_info> Pcinfo_arr = new ArrayList<>();
@@ -39,11 +39,11 @@ public class Pcbang_List_Activity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.pcbang_list_activity);
+        setContentView(R.layout.pcbang_favorite_layout);
 
-        btn_close=(TextView)findViewById(R.id.btn_close);
-        App_Title=(TextView)findViewById(R.id.App_Title);
-        btn_change_event=(TextView)findViewById(R.id.btn_change_event);
+        btn_close=(TextView)findViewById(R.id.btn_text_back);
+        App_Title=(TextView)findViewById(R.id.text_title);
+        btn_search_pc=(TextView)findViewById(R.id.btn_search_pc);
 
 
 
@@ -51,10 +51,9 @@ public class Pcbang_List_Activity extends Activity {
 
         PcbangAdapter = new pcAdapter(this, R.layout.pcbanglist, Pcinfo_arr);
 
-        Intent i = getIntent();
-        String type = i.getStringExtra("type");
-        TypeDefine(type);
 
+        HttpRequester httpRequester = new HttpRequester();
+        httpRequester.request(Pcbang_uri.pcBang_allceo, httpCallback);
 
         pcbang_list.setAdapter(PcbangAdapter);
 
@@ -64,7 +63,7 @@ public class Pcbang_List_Activity extends Activity {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
 
                 //상세정보 액티비티
-                Intent pcbang = new Intent(Pcbang_List_Activity.this, Pcbang_detail_Activity.class);
+                Intent pcbang = new Intent(Pcbang_Favorite_Activity.this, Pcbang_detail_Activity.class);
                 pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position));//pc방 고유 코드
                 startActivity(pcbang);
 
@@ -78,42 +77,15 @@ public class Pcbang_List_Activity extends Activity {
             }
         });
 
-        btn_change_event.setOnClickListener(new View.OnClickListener() {
+        btn_search_pc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(Pcbang_List_Activity.this, "미구현", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Pcbang_Favorite_Activity.this, "미구현", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
 
-    void TypeDefine(String type){
-        switch (type){
-            case "1":
-                App_Title.setText("내 위치주변 PC방");
-                btn_change_event.setText("내위치찾기");
-                HttpRequester httpRequester = new HttpRequester();
-                httpRequester.request(Pcbang_uri.pcBang_allceo, httpCallback);
-
-                //위치 검색 반경 m정해서
-                break;
-            case "2":
-                App_Title.setText("지하철 근처 PC방");
-                btn_change_event.setText("지하철역검색");
-                //지하철역 검색? 후 지하철역 검색결과/클릭후 반경 m
-                break;
-            case "3":
-                App_Title.setText("이벤트 PC방");
-                btn_change_event.setText("??");
-                //이벤트 on 피시방 / 내위치 주변?
-                break;
-            case "4":
-                App_Title.setText("즐겨찾기 PC방");
-                btn_change_event.setText("즐겨찾기");
-                //즐겨찾기가 눌린거
-                break;
-        }
-    }
 
 
 
@@ -144,7 +116,7 @@ public class Pcbang_List_Activity extends Activity {
 
             }
             catch (NullPointerException f){
-                Toast.makeText(Pcbang_List_Activity.this, "데이터 에러", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Pcbang_Favorite_Activity.this, "데이터 에러", Toast.LENGTH_SHORT).show();
             }
             PcbangAdapter.notifyDataSetChanged();
         }
@@ -153,3 +125,4 @@ public class Pcbang_List_Activity extends Activity {
 
 
 }
+

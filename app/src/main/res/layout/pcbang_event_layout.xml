@@ -6,7 +6,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/app_actionbar" />
+    <RelativeLayout
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#80000000"
+        android:orientation="vertical"
+        android:padding="5dp">
+
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="112dp"
+            android:layout_height="56dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:text="행사 PC방"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/btn_text_back"
+            android:layout_width="51dp"
+            android:layout_height="46dp"
+            android:layout_alignParentLeft="true"
+            android:background="?attr/actionModeCloseDrawable" />
+    </RelativeLayout>
 
     <FrameLayout
         android:layout_width="match_parent"
