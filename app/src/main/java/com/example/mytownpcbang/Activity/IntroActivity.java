@@ -1,13 +1,17 @@
 package com.example.mytownpcbang.Activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mytownpcbang.R;
 
@@ -47,7 +51,9 @@ public class IntroActivity extends Activity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                handler.postDelayed(r, 500);
+
+
+                checkPermission();
             }
 
             @Override
@@ -56,6 +62,52 @@ public class IntroActivity extends Activity {
             }
         });
 
+    }
+
+    private void checkPermission() {
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Explain to the user why we need to write the permission.
+                Toast.makeText(this, "Read/Write external storage", Toast.LENGTH_SHORT).show();
+            }
+
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
+                    123);
+
+
+        } else {
+            // 다음 부분은 항상 허용일 경우에 해당이 됩니다.
+            Log.d("data_permission", "Permission 항상허용");
+            handler.postDelayed(r, 500);
+
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 123:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+
+                    Log.d("data_permission", "Permission always ??");
+                    handler.postDelayed(r, 500);
+                    // permission was granted, yay! do the
+                    // calendar task you need to do.
+
+                } else {
+
+                    Log.d("data_permission", "Permission always deny");
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                break;
+        }
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.example.mytownpcbang.Activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,18 +17,12 @@ import com.example.mytownpcbang.PcbangArray.PcBang_info;
 import com.example.mytownpcbang.PcbangArray.pcAdapter;
 import com.example.mytownpcbang.R;
 import com.example.mytownpcbang.Server.HttpCallback;
+import com.example.mytownpcbang.Server.HttpRequester;
 import com.example.mytownpcbang.Server.Pcbang_uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
-    double topLon, bottomLon, leftLat, rightLat;
 
 
     void setLayout() {
@@ -66,10 +58,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setLayout();
-        topLon = 37.588287;
-        bottomLon = 37.586287;
-        leftLat = 127.009234;
-        rightLat = 127.009034;
         boolean tmp = pref.getBoolean("fav_switch", false); //즐겨찾기 on/off 체크
         Callfav_list();
 
@@ -90,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //상세정보 액티비티
                 Intent pcbang = new Intent(MainActivity.this, Pcbang_detail_Activity.class);
-                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position));//pc방 고유 코드
+                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position).get_id());//pc방 고유 코드
                 startActivity(pcbang);
 
             }
@@ -141,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
 
     public synchronized void SetPcBangList(String data) { //샘플데이터
 
-        HttpRequest httpRequester = new HttpRequest();
-        httpRequester.request(Pcbang_uri.pcBang_search_id, httpCallback);
+        HttpRequester httpRequester = new HttpRequester();
+        httpRequester.request(Pcbang_uri.pcBang_search_id + data, httpCallback);
 
     }
 
@@ -151,7 +139,8 @@ public class MainActivity extends AppCompatActivity {
         public void onResult(String result) {
             try {
                 JSONArray root = new JSONArray(result);
-                Log.d("fav_data", "call" + result);
+                Log.d("Main_fav_data", "call" + result);
+
                 Pcinfo_arr.add(
                         new PcBang_info(root.getJSONObject(0).getString("pcBangName"),
                                 root.getJSONObject(0).getString("tel"),
@@ -159,12 +148,12 @@ public class MainActivity extends AppCompatActivity {
                                 root.getJSONObject(0).getJSONObject("address").getString("roadAddress"),
                                 root.getJSONObject(0).getString("_id"),
                                 root.getJSONObject(0).getJSONObject("address").getString("detailAddress"),
-                                "4",
-                                root.getJSONObject(0).getJSONObject("location").getString("lat"),
-                                root.getJSONObject(0).getJSONObject("location").getString("lon")));
+                                root.getJSONObject(0).getDouble("ratingScore"),
+                                Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lat")),
+                                Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lon"))));
 
 
-                Log.d("fav_data", "호출완료");
+                Log.d("Main_fav_data", "호출완료");
 
             } catch (JSONException d) {
 
@@ -177,20 +166,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void onResume() {
+    /*public void onResume() {
         super.onResume();
         Callfav_list();
-    }
+    }*/
 
     public void Callfav_list() {
         Pcinfo_arr.clear();
         String fav_arr = pref.getString("fav_list", null);
         if (fav_arr == null) {
+            Log.d("Main_fav_data", "fav_save_no data");
         } else {
-
+            Log.d("Main_fav_data", "date ok  : "+fav_arr);
             try {
                 JSONArray json_fav_list = new JSONArray(fav_arr);
-
 
                 for (int i = 0; i < json_fav_list.length(); i++) {
                     SetPcBangList(json_fav_list.optString(i));
@@ -201,90 +190,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-            Log.d("fav_data", "shared  : " + Pcinfo_arr.size());
+            Log.d("Main_fav_data", "shared  : " + Pcinfo_arr.size());
         }
-    }
-
-
-    public class HttpRequest {
-
-        HttpTask http;
-
-        public void request(String url, HttpCallback callback) {
-            http = new HttpRequest.HttpTask(url, callback);
-            http.execute();
-        }
-
-        public void cancel() {
-            if (http != null)
-                http.cancel(true);
-        }
-
-        private class HttpTask extends AsyncTask<Void, Void, String> {
-            String url;
-            HttpCallback callback;
-
-            public HttpTask(String url, HttpCallback callback) {
-                this.url = url;
-                this.callback = callback;
-            }
-
-            @Override
-            protected String doInBackground(Void... nothing) {
-                String response = "";
-                String postData = "";
-                PrintWriter pw = null;
-                BufferedReader in = null;
-
-                //add~~~~~~~~~~~~~~
-                try {
-                    URL text = new URL(url);
-                    HttpURLConnection http = (HttpURLConnection) text.openConnection();
-                    http.setRequestProperty("Content-type", "application/x-www-form-urlencoded;charset=UTF-8");
-                    http.setConnectTimeout(10000);
-                    http.setReadTimeout(10000);
-                    http.setRequestMethod("POST");
-                    http.setDoInput(true);
-                    http.setDoOutput(true);
-
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append("topLon").append("=").append(topLon).append("&");                 // php 변수에 값 대입
-                    buffer.append("bottomLon").append("=").append(bottomLon).append("&");   // php 변수 앞에 '$' 붙이지 않는다
-                    buffer.append("leftLat").append("=").append(leftLat).append("&");           // 변수 구분은 '&' 사용
-                    buffer.append("rightLat").append("=").append(rightLat);
-
-                    OutputStreamWriter outStream = new OutputStreamWriter(http.getOutputStream(), "EUC-KR");
-                    PrintWriter writer = new PrintWriter(outStream);
-                    writer.write(buffer.toString());
-                    writer.flush();
-
-                    in = new BufferedReader(new InputStreamReader(http.getInputStream(), "UTF-8"));
-                    StringBuffer sb = new StringBuffer();
-                    String inputLine;
-                    while ((inputLine = in.readLine()) != null) {
-                        sb.append(inputLine);
-                    }
-                    response = sb.toString();
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-
-                return response;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                //add~~~~~~~~~~~
-                this.callback.onResult(result);
-
-            }
-        }
-
     }
 
 
 }
-
