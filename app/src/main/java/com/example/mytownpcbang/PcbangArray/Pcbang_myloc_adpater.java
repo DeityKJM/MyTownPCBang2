@@ -1,6 +1,7 @@
 package com.example.mytownpcbang.PcbangArray;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,17 +14,17 @@ import com.example.mytownpcbang.R;
 import java.util.ArrayList;
 
 /**
- * Created by KimJeongMin on 2017-12-15.
+ * Created by Jeongmin on 2018-01-26.
  */
 
-public class pcAdapter extends BaseAdapter {
-    private ArrayList<PcBang_info> arr = new ArrayList<>();
+public class Pcbang_myloc_adpater extends BaseAdapter {
+    private ArrayList<Pcbang_myloc_info> arr = new ArrayList<>();
     private Context mContext;
     private int layout;
     private LayoutInflater inflater;
 
 
-    public pcAdapter(Context mContext, int layout, ArrayList<PcBang_info> arr) {
+    public Pcbang_myloc_adpater(Context mContext, int layout, ArrayList<Pcbang_myloc_info> arr) {
         this.mContext = mContext;
         this.layout = layout;
         this.arr = arr;
@@ -36,7 +37,7 @@ public class pcAdapter extends BaseAdapter {
     }
 
     @Override
-    public PcBang_info getItem(int i) {
+    public Pcbang_myloc_info getItem(int i) {
         return arr.get(i);
     }
 
@@ -55,16 +56,24 @@ public class pcAdapter extends BaseAdapter {
         final RatingBar star = (RatingBar) view.findViewById(R.id.pcbang_rating);
 
 
-
         final Double ratingScore = getItem(position).getratingScore();
         star.setNumStars(5);
         star.setStepSize(0.5f);
         star.setRating(ratingScore.floatValue());
 
 
+        Double x = getItem(position).getMyloc_Latitude();
+        Double y = getItem(position).getMyloc_Longitude();
+        Double a = getItem(position).getLatitude();
+        Double b = getItem(position).getLongitude();
+
+        Double distance = Math.sqrt(Math.pow(Math.abs(x - a) * 114000, 2) + Math.pow(Math.abs(y - b) * 88000, 2));
+
+        Log.d("fav_distance", "distance" + distance);
 
         pcbangName.setText(getItem(position).getPcBangName());
-        pcbanginfo.setText("\n주소 : " + getItem(position).getroadAddress() + "\n" + "번호 " + getItem(position).getpcBangTel() + "" + "" + "");
+        pcbanginfo.setText("\n주소 : " + getItem(position).getroadAddress() + "\n" + "거리 " + (int) Math.floor(distance) + "M");
+
         return view;
     }
 }

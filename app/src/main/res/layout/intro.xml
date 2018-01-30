@@ -12,6 +12,6 @@
         android:layout_centerHorizontal="true"
         android:layout_centerInParent="false"
         android:layout_centerVertical="true"
-        android:text="피 방 자 리"
+        android:background="@drawable/pc_icon"
         android:textSize="30sp" />
 </RelativeLayout>

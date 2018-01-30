@@ -3,6 +3,7 @@
     package="com.example.mytownpcbang">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
         android:allowBackup="true"
@@ -11,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name=".Activity.IntroActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,8 +24,12 @@
         android:value="AIzaSyCEo8eZQlnRq-paDV9nhkZ1vqgUK1CTxV8"/>
 
         <activity android:name=".Activity.Pcbang_detail_Activity"/>
-        <activity android:name=".Activity.Pcbang_List_Activity"/>
         <activity android:name=".Activity.Pcbang_review_Activity"/>
+        <activity android:name=".Activity.Pcbang_Myloc_Activity"/>
+        <activity android:name=".Activity.Pcbang_Subway_Activity"/>
+        <activity android:name=".Activity.Pcbang_Event_Activity"/>
+        <activity android:name=".Activity.Pcbang_Favorite_Activity"/>
+        <activity android:name=".Activity.MainActivity"/>
     </application>
 
 </manifest>

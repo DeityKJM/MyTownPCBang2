@@ -21,8 +21,11 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mytownpcbang.PcbangArray.PcBang_info;
+import com.example.mytownpcbang.PcbangArray.Pcbang_detail_info;
 import com.example.mytownpcbang.R;
+import com.example.mytownpcbang.Server.HttpCallback;
+import com.example.mytownpcbang.Server.HttpRequester;
+import com.example.mytownpcbang.Server.Pcbang_uri;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
@@ -44,9 +48,9 @@ import pl.polidea.view.ZoomView;
 
 public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapReadyCallback, View.OnClickListener {
     TextView btn_text_back, text_title, btn_text_fav;
-    LinearLayout Layout_pcbang_seat, Layout_pcbang_map, Layout_pcbang_review,Layout_pcbang_event; //좌석/후기/위치
-    TextView Pcbang_image, pcbang_info,btn_text_pcspec,  btn_text_review_write;
-    Button btn_text_event,  btn_text_loc, btn_text_review,btn_text_seat;
+    LinearLayout Layout_pcbang_seat, Layout_pcbang_map, Layout_pcbang_review, Layout_pcbang_event; //좌석/후기/위치
+    TextView Pcbang_image, pcbang_info, btn_text_pcspec, btn_text_review_write;
+    Button btn_text_event, btn_text_loc, btn_text_review, btn_text_seat;
     ListView review_listview;
     RatingBar pcbang_ratingbar;
     GoogleMap map;
@@ -60,8 +64,9 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
 
     LinearLayout pcmap;
     int[] nums = {0, 3, 0, 1, 1, 1, 1, 0, 2, 0, 0, 3, 1, 1, 1, 0, 0, 2, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0};
-    PcBang_info arr;
+    String Pcbang_id;
     ArrayList<String> fav_list = new ArrayList<>();
+    Pcbang_detail_info pcBang_info;
 //
 
     public void SetLayout() {
@@ -72,7 +77,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         Layout_pcbang_seat = (LinearLayout) findViewById(R.id.lay_pcbang_Seat);
         Layout_pcbang_map = (LinearLayout) findViewById(R.id.lay_pcbang_map);
         Layout_pcbang_review = (LinearLayout) findViewById(R.id.lay_pcbang_review);
-        Layout_pcbang_event= (LinearLayout) findViewById(R.id.lay_pcbang_event);
+        Layout_pcbang_event = (LinearLayout) findViewById(R.id.lay_pcbang_event);
         review_listview = (ListView) findViewById(R.id.review_listview);
         Pcbang_image = (TextView) findViewById(R.id.Pcbang_image);
         pcbang_info = (TextView) findViewById(R.id.pcbang_info);
@@ -83,7 +88,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         btn_text_loc = (Button) findViewById(R.id.btn_text_loc);
         btn_text_review = (Button) findViewById(R.id.btn_text_review);
         btn_text_event = (Button) findViewById(R.id.btn_text_event);
-        btn_text_seat= (Button) findViewById(R.id.btn_text_seat);
+        btn_text_seat = (Button) findViewById(R.id.btn_text_seat);
         btn_text_review_write.setOnClickListener(this);
         btn_text_loc.setOnClickListener(this);
         btn_text_review.setOnClickListener(this);
@@ -95,17 +100,6 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         mEditor = mPref.edit();
 
 
-        //intent 데이터 받기
-        arr = (PcBang_info) getIntent().getSerializableExtra("pcbanginfo");
-
-        //pc방 정보 세팅
-        Pcbang_image.setText(arr.getPcBangName());
-        pcbang_info.setText(arr.getdetailAddress() + arr.getroadAddress());
-        btn_text_pcspec.setText("사양\n" + arr.getpcBangTel());
-        pcbang_ratingbar.setNumStars(5);
-        pcbang_ratingbar.setStepSize(0.5f);
-        pcbang_ratingbar.setRating(Float.parseFloat(arr.getStarnum()));
-
     }
 
     @Override
@@ -114,15 +108,15 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         setContentView(R.layout.pcbang_detail_layout);
         SetLayout();//레이아웃세팅;
 
-        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
-        //map세팅
 
+//intent 데이터 받기
+        Pcbang_id = getIntent().getStringExtra("pcbanginfo");
+        SetPcBangList(Pcbang_id);
+        //pc방 정보 세팅
 
         //인플레이트 레이아웃
         v = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.zoom_item, null, false);
         pcmap = (LinearLayout) v.findViewById(R.id.Grid);
-
-
 
 
         container.addView(PCseatView(v, 4, 5, nums));
@@ -135,7 +129,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 for (int i = 0; i < fav_array.length(); i++) {
                     fav_list.add(fav_array.optString(i));
 
-                    if (fav_array.optString(i).equals(arr.get_id())) { //즐겨찾기 목록에 지금 현 pc방이름과 일치하는 데이터 있는지 확인
+                    if (fav_array.optString(i).equals(Pcbang_id)) { //즐겨찾기 목록에 지금 현 pc방이름과 일치하는 데이터 있는지 확인
                         btn_text_fav.setTag("on"); //태그 on
                         btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
                         Log.d("fav_data", "switch 0n");
@@ -148,6 +142,13 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
             }
         }
 
+
+    }
+
+    public void SetPcBangList(String Pcbang_id) { //샘플데이터
+
+        HttpRequester httpRequester = new HttpRequester();
+        httpRequester.request(Pcbang_uri.pcBang_search_id + Pcbang_id, httpCallback);
 
     }
 
@@ -176,7 +177,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 break;
             case R.id.btn_text_review_write:
                 Intent reviewIntent = new Intent(Pcbang_detail_Activity.this, Pcbang_review_Activity.class);
-                reviewIntent.putExtra("pcbanginfo2", arr);
+                reviewIntent.putExtra("pcbanginfo2", Pcbang_id);
                 startActivity(reviewIntent);
                 Layout_pcbang_review.setVisibility(View.GONE);
                 Layout_pcbang_map.setVisibility(View.GONE);
@@ -259,17 +260,16 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
         map = googleMap;
 
         if (map != null) {
-            Log.d("위치",""+arr.getLatitude()+ " "+arr.getLongitude());
-           // LatLng latLng = new LatLng(Float.parseFloat(arr.getLatitude()), Float.parseFloat(arr.getLongitude()));
-            LatLng latLng = new LatLng(Float.parseFloat(arr.getLongitude()), Float.parseFloat(arr.getLatitude()));
+            Log.d("위치", "" + pcBang_info.getLatitude() + " " + pcBang_info.getLongitude());
+            LatLng latLng = new LatLng(pcBang_info.getLatitude(), (pcBang_info.getLongitude()));
             CameraPosition position = new CameraPosition.Builder().target(latLng).zoom(16f).build();
             map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
 
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_location));
             markerOptions.position(latLng);
-            markerOptions.title(arr.getPcBangName());
-            markerOptions.snippet("TEL : " + arr.getpcBangTel());
+            markerOptions.title(pcBang_info.getPcBangName());
+            markerOptions.snippet("TEL : " + pcBang_info.getpcBangTel());
 
             map.addMarker(markerOptions);
 
@@ -293,7 +293,7 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 public void onClick(DialogInterface dialogInterface, int i) {
 
                     for (int c = 0; c < fav_list.size(); c++) {
-                        if (fav_list.get(c).equals(arr.get_id())) {
+                        if (fav_list.get(c).equals(Pcbang_id)) {
                             fav_list.remove(c);
                             Log.d("fav_data", "삭제 일치");
                         }
@@ -317,11 +317,11 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 final String tmpstr = mPref.getString("fav_list", null);
 
                 for (int c = 0; c < fav_list.size(); c++) {
-                    if (fav_list.get(c).equals(arr.get_id())) {
+                    if (fav_list.get(c).equals(Pcbang_id)) {
                         fav_list.remove(c);
                     }
                 }
-                fav_list.add(arr.get_id());
+                fav_list.add(Pcbang_id);
                 JSONArray tmp = new JSONArray();
                 for (int d = 0; d < fav_list.size(); d++) {
                     tmp.put(fav_list.get(d));
@@ -331,11 +331,54 @@ public class Pcbang_detail_Activity extends AppCompatActivity implements OnMapRe
                 mEditor.commit();
                 btn_text_fav.setBackgroundResource(android.R.drawable.btn_star_big_on);
                 btn_text_fav.setTag("on");
-                Toast.makeText(this, arr.getPcBangName() + "를 즐겨찾기에 추가하였습니다.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, pcBang_info.getPcBangName() + "를 즐겨찾기에 추가하였습니다.", Toast.LENGTH_SHORT).show();
             }
 
         }
     }
 
+    HttpCallback httpCallback = new HttpCallback() {
+        @Override
+        public void onResult(String result) {
+            try {
+                JSONArray root = new JSONArray(result);
+                Log.d("detail_pc", "call" + result);
+                pcBang_info = new Pcbang_detail_info(root.getJSONObject(0).getString("pcBangName"),
+                        root.getJSONObject(0).getString("tel"),
+                        root.getJSONObject(0).getJSONObject("address").getString("postCode"),
+                        root.getJSONObject(0).getJSONObject("address").getString("roadAddress"),
+                        root.getJSONObject(0).getString("_id"),
+                        root.getJSONObject(0).getJSONObject("address").getString("detailAddress"),
+                        root.getJSONObject(0).getDouble("ratingScore"),
+                        Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lat")),
+                        Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lon")),
+                        root.getJSONObject(0).getJSONObject("pcSpec").getString("CPU"),
+                        root.getJSONObject(0).getJSONObject("pcSpec").getString("RAM"),
+                        root.getJSONObject(0).getJSONObject("pcSpec").getString("VGA"));
+
+
+                Pcbang_image.setText(pcBang_info.getPcBangName());
+                pcbang_info.setText(pcBang_info.getdetailAddress() + pcBang_info.getroadAddress());
+                btn_text_pcspec.setText("사양 : \n" + "CPU : " + pcBang_info.getCPU() + "\nRAM : " + pcBang_info.getRAM() + "\nVGQ" + pcBang_info.getVGA());
+                pcbang_ratingbar.setNumStars(5);
+                pcbang_ratingbar.setStepSize(0.5f);
+                if (pcBang_info.getratingScore()==null) {
+                    pcbang_ratingbar.setRating(0);
+                } else {
+                    pcbang_ratingbar.setRating(pcBang_info.getratingScore().floatValue());
+                }
+
+                ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(Pcbang_detail_Activity.this);
+                Log.d("detail_pc", "호출완료");
+
+            } catch (JSONException d) {
+
+                d.printStackTrace();
+
+            } catch (NullPointerException f) {
+                Toast.makeText(Pcbang_detail_Activity.this, "데이터 에러", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
 
 }

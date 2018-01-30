@@ -59,7 +59,7 @@ public class Pcbang_Subway_Activity extends Activity {
 
                 //상세정보 액티비티
                 Intent pcbang = new Intent(Pcbang_Subway_Activity.this, Pcbang_detail_Activity.class);
-                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position));//pc방 고유 코드
+                pcbang.putExtra("pcbanginfo", Pcinfo_arr.get(position).get_id());//pc방 고유 코드
                 startActivity(pcbang);
 
 
@@ -98,9 +98,9 @@ public class Pcbang_Subway_Activity extends Activity {
                                     root.getJSONObject(i).getJSONObject("address").getString("roadAddress"),
                                     root.getJSONObject(i).getString("_id"),
                                     root.getJSONObject(i).getJSONObject("address").getString("detailAddress"),
-                                    "4",
-                                    root.getJSONObject(i).getJSONObject("location").getString("lat"),
-                                    root.getJSONObject(i).getJSONObject("location").getString("lon")));
+                                    root.getJSONObject(i).getDouble("ratingScore"),
+                                    Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lat")),
+                                    Double.parseDouble(root.getJSONObject(0).getJSONObject("location").getString("lon"))));
 
                 }
 

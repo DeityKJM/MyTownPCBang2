@@ -12,7 +12,7 @@ import java.net.URL;
 public class HttpRequester {
 	
 	HttpTask http;
-	
+
 	public void request(String url, HttpCallback callback) {
 		http = new HttpTask(url, callback);
 		http.execute();
@@ -75,5 +75,6 @@ public class HttpRequester {
 			
 		}
 	}
+
 
 }

@@ -7,9 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     pcAdapter PcbangAdapter;
     ArrayList<PcBang_info> Pcinfo_arr = new ArrayList<>();
     ListView pcbang_list;
-    Switch fav_switch;
+
     TextView textView;
     SharedPreferences pref;
     SharedPreferences.Editor editor;
@@ -40,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     void setLayout() {
 
         pcbang_list = (ListView) findViewById(R.id.main_fav_listview);
-        fav_switch = (Switch) findViewById(R.id.fav_switch);
         textView = (TextView) findViewById(R.id.tmpview);
 
         PcbangAdapter = new pcAdapter(this, R.layout.pcbanglist, Pcinfo_arr);
@@ -58,18 +55,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setLayout();
-        boolean tmp = pref.getBoolean("fav_switch", false); //즐겨찾기 on/off 체크
-        Callfav_list();
 
-        if (tmp) {
-            fav_switch.setChecked(true);
-            pcbang_list.setVisibility(View.VISIBLE);
-            textView.setVisibility(View.GONE);
-        } else {
-            fav_switch.setChecked(false);
-            textView.setVisibility(View.VISIBLE);
-            pcbang_list.setVisibility(View.GONE);
-        }
+        //Callfav_list();
+
+
 
 
         pcbang_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -84,21 +73,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fav_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    pcbang_list.setVisibility(View.VISIBLE);
-                    textView.setVisibility(View.GONE);
-                    editor.putBoolean("fav_switch", true);
-                } else {
-                    textView.setVisibility(View.VISIBLE);
-                    pcbang_list.setVisibility(View.GONE);
-                    editor.putBoolean("fav_switch", false);
-                }
-                editor.commit();
-            }
-        });
 
     }
 
@@ -166,17 +140,21 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    /*public void onResume() {
+    public void onResume() {
         super.onResume();
         Callfav_list();
-    }*/
+    }
 
     public void Callfav_list() {
         Pcinfo_arr.clear();
         String fav_arr = pref.getString("fav_list", null);
         if (fav_arr == null) {
             Log.d("Main_fav_data", "fav_save_no data");
+            textView.setVisibility(View.VISIBLE);
+            pcbang_list.setVisibility(View.GONE);
         } else {
+            pcbang_list.setVisibility(View.VISIBLE);
+            textView.setVisibility(View.GONE);
             Log.d("Main_fav_data", "date ok  : "+fav_arr);
             try {
                 JSONArray json_fav_list = new JSONArray(fav_arr);
